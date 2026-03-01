@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#070A12" />
+  <title>הרולטה של אופיר | Premium</title>
+  
+  <link rel="manifest" href="./manifest.json">
+
+  <style>
+    /* =========================================
+       I. DESIGN SYSTEM & TYPOGRAPHY
+       ========================================= */
+    :root {
+      --bg-dark: #070A12;
+      --surface-card: rgba(14, 20, 36, 0.85);
+      --surface-modal: rgba(11, 16, 32, 0.95);
+      --border-glow: rgba(255, 255, 255, 0.08);
+      --rim-light: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --accent-gold: #fbbf24;
+      --accent-rose: #fb7185;
+      --success: #10b981;
+      --danger: #ef4444;
+      
+      --shadow-deep: 0 40px 80px -15px rgba(0, 0, 0, 0.9);
+      --shadow-inner: inset 0 15px 25px rgba(0,0,0,0.6);
+      
+      --radius-lg: 28px;
+      --radius-md: 16px;
+      
+      --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html { -webkit-text-size-adjust: 100%; box-sizing: border-box; }
+    *, *:before, *:after { box-sizing: inherit; margin: 0; padding: 0; }
+    
+    body {
+      min-height: 100vh; min-height: 100svh;
+      overscroll-behavior: none; user-select: none;
+      font-family: var(--font-stack);
+      color: var(--text-main); background: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 20% 0%, rgba(251, 113, 133, 0.05), transparent 40%),
+        radial-gradient(circle at 80% 100%, rgba(251, 191, 36, 0.05), transparent 40%);
+      display: flex; align-items: center; justify-content: center; padding: 16px; overflow-x: hidden;
+      line-height: 1.4;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      .ambient-glow, .particle { display: none !important; }
+    }
+
+    /* =========================================
+       II. CORE COMPONENTS (DEPTH & LIGHTING)
+       ========================================= */
+    .app-container { width: 100%; max-width: 480px; position: relative; z-index: 10; margin: auto; perspective: 1000px; }
+    
+    .ambient-glow {
+      position: absolute; inset: -30px;
+      background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,113,133,0.1));
+      filter: blur(50px); border-radius: 50%; z-index: -1;
+      animation: pulseGlow 6s ease-in-out infinite alternate;
+      will-change: transform, opacity;
+    }
+    @keyframes pulseGlow { 0% { transform: scale(0.9); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 1; } }
+
+    .card {
+      background: var(--surface-card); border: 1px solid var(--border-glow);
+      border-radius: var(--radius-lg); padding: 32px 24px;
+      box-shadow: var(--shadow-deep), var(--rim-light);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      text-align: center; position: relative; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Hero Moment Bounce */
+    .card.hero-pop { animation: heroPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 60px rgba(251, 191, 36, 0.15), var(--rim-light); }
+    @keyframes heroPop { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+    /* Bad Outcome Shake */
+    .shake-anim { animation: shakeError 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shakeError { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
+
+    .header-title { 
+      font-size: clamp(26px, 8vw, 36px); font-weight: 900; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; 
+    }
+    .header-subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 20px; font-weight: 600; letter-spacing: 0.2px; }
+
+    /* =========================================
+       III. REEL SYSTEM (THE SLOT MACHINE)
+       ========================================= */
+    .reel-wrapper {
+      height: 100px; background: rgba(0, 0, 0, 0.6); border-radius: var(--radius-md); 
+      border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: var(--shadow-inner), var(--rim-light);
+      position: relative; overflow: hidden; margin-bottom: 24px;
+    }
+    /* Fade masks top and bottom */
+    .reel-wrapper::before, .reel-wrapper::after {
+      content: ''; position: absolute; left: 0; right: 0; height: 35px; z-index: 3; pointer-events: none;
+    }
+    .reel-wrapper::before { top: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
+    .reel-wrapper::after  { bottom: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+    
+    /* Center Pointer */
+    .reel-pointer {
+      position: absolute; top: 50%; left: 0; right: 0; height: 46px; transform: translateY(-50%);
+      border-top: 1px solid rgba(251, 191, 36, 0.2); border-bottom: 1px solid rgba(251, 191, 36, 0.2);
+      background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.05) 50%, transparent);
+      z-index: 2; pointer-events: none;
+    }
+
+    .reel-strip {
+      width: 100%; position: absolute; top: 0; left: 0;
+      will-change: transform, filter; padding-top: 27px; /* Center first item */
+    }
+    .reel-strip.blur-effect { filter: blur(1.5px); opacity: 0.9; }
+
+    .reel-item {
+      height: 46px; display: flex; align-items: center; justify-content: center;
+      font-size: clamp(20px, 5vw, 24px); font-weight: 900; color: var(--text-muted);
+      transition: color 0.2s, text-shadow 0.2s, transform 0.2s;
+    }
+    .reel-item.active { color: var(--accent-gold); text-shadow: 0 2px 15px rgba(251, 191, 36, 0.5); transform: scale(1.05); }
+
+    /* =========================================
+       IV. BUTTONS & INTERACTIONS
+       ========================================= */
+    .btn-group { display: flex; gap: 12px; justify-content: center; margin-bottom: 8px;}
+    button {
+      outline: none; border: none; padding: 16px 20px; font-size: 17px; font-weight: 900;
+      border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+      font-family: inherit; -webkit-tap-highlight-color: transparent; position: relative; overflow: hidden;
+    }
+    button::after {
+      content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.1); opacity: 0; transition: opacity 0.2s;
+    }
+    button:hover::after { opacity: 1; }
+    
+    .btn-primary { 
+      flex: 2; background: linear-gradient(135deg, var(--accent-gold), var(--accent-rose)); 
+      color: #000; box-shadow: 0 8px 25px rgba(251, 113, 133, 0.25), inset 0 1px 1px rgba(255,255,255,0.4); 
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 10px rgba(251, 113, 133, 0.2), inset 0 1px 1px rgba(255,255,255,0.4); }
+    
+    .btn-secondary { flex: 1; background: rgba(255, 255, 255, 0.03); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); box-shadow: var(--rim-light); }
+    .btn-secondary:active:not(:disabled) { background: rgba(255, 255, 255, 0.08); transform: translateY(2px); }
+    
+    button:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(100%); transform: none; box-shadow: none; }
+
+    /* Top Chips */
+    .top-actions { display:flex; gap:10px; justify-content:center; margin-bottom:18px; flex-wrap:wrap; }
+    .chip { padding: 8px 14px; font-size: 12px; font-weight: 800; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-muted); cursor:pointer; transition: all 0.2s ease; box-shadow: var(--rim-light); }
+    .chip:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
+    .chip:active { transform: scale(0.96); }
+    .chip.auth-in { border-color: rgba(16, 185, 129, 0.3); color: #34d399; }
+
+    /* =========================================
+       V. RESULTS & SHOPPING LIST
+       ========================================= */
+    .result-panel { margin-top: 16px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); display: none; opacity: 0; transition: opacity 0.4s ease; }
+    .result-panel.show { display: block; opacity: 1; }
+
+    .mood-text { font-size: 24px; font-weight: 900; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .mood-subtext { font-size: 14px; font-weight: 700; color: var(--text-muted); margin-bottom: 20px; }
+    .good-mood { color: var(--accent-gold); text-shadow: 0 2px 10px rgba(251,191,36,0.3); } 
+    .bad-mood { color: var(--danger); text-shadow: 0 2px 10px rgba(239,68,68,0.3); }
+
+    .shopping-list { background: rgba(0, 0, 0, 0.4); border-radius: var(--radius-md); padding: 18px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: right; margin-bottom: 16px; box-shadow: var(--shadow-inner); }
+    .shopping-title { font-size: 14px; font-weight: 900; color: #cbd5e1; margin-bottom: 14px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+    
+    .person-task { background: rgba(255, 255, 255, 0.02); padding: 12px; margin-bottom: 8px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.02); transition: background 0.2s;}
+    .person-task:hover { background: rgba(255, 255, 255, 0.04); }
+    .person-task:last-child { margin-bottom: 0; }
+    .person-name { font-weight: 900; font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;}
+    .items-container { display: flex; flex-wrap: wrap; gap: 6px; }
+    .item-tag { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); padding: 6px 10px; border-radius: 8px; font-size: 13px; color: #f1f5f9; font-weight: 600; }
+
+    .name-ofir { color: var(--accent-gold); } .name-dudi { color: #38bdf8; } .name-stav { color: #a78bfa; }
+
+    /* Results Actions */
+    .result-actions { display: flex; gap: 8px; margin-top: 16px;}
+    .cta-btn { flex: 1; padding: 14px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; transition: all 0.2s ease; border: none; display: flex; align-items: center; justify-content: center; gap: 6px;}
+    .cta-idea { flex: 2; background: rgba(16, 185, 129, 0.1); border: 1px dashed rgba(16, 185, 129, 0.4); color: #34d399; }
+    .cta-copy { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); }
+    .cta-btn:active { transform: scale(0.97); }
+
+    /* =========================================
+       VI. PARTICLES (PREMIUM CONFETTI)
+       ========================================= */
+    #particles { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
+    .particle { position: absolute; bottom: -20px; border-radius: 50%; opacity: 0; will-change: transform, opacity; }
+    @keyframes floatUp { 
+      0% { transform: translateY(0) scale(0.5); opacity: 0; }
+      20% { opacity: 0.8; }
+      100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+    }
+
+    /* =========================================
+       VII. MODALS & TOASTS
+       ========================================= */
+    .toast { position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%); background: rgba(16, 185, 129, 0.95); color: #fff; padding: 14px 28px; border-radius: 999px; font-weight: 800; font-size: 14px; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3); backdrop-filter: blur(10px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; opacity: 0; pointer-events: none; white-space: nowrap; }
+    .toast.show { bottom: 40px; opacity: 1; }
+    .toast.error-toast { background: rgba(239, 68, 68, 0.95); box-shadow: 0 15px 35px rgba(239, 68, 68, 0.3); }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; opacity: 0; transition: opacity 0.3s ease; }
+    .modal-backdrop.active { display: flex; opacity: 1; }
+    .modal { width: min(480px, 100%); border-radius: var(--radius-lg); border: 1px solid var(--border-glow); background: var(--surface-modal); box-shadow: var(--shadow-deep), var(--rim-light); padding: 24px 20px; text-align: right; transform: translateY(20px) scale(0.96); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; max-height: 90vh; }
+    .modal-backdrop.active .modal { transform: translateY(0) scale(1); }
+    
+    .modal h3 { font-size: 20px; font-weight: 900; margin-bottom: 8px; text-align: center; }
+    .modal p { color: rgba(203,213,225,0.8); font-size: 14px; margin-bottom: 20px; text-align: center; font-weight: 500; }
+    
+    .input, .textarea { width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: var(--text-main); padding: 14px; outline: none; font-size: 15px; font-weight: 700; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 16px;}
+    .input:focus, .textarea:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
+    .textarea { min-height: 100px; resize: none; }
+    
+    .note { font-size: 12px; color: rgba(203,213,225,0.4); text-align: center; margin-top: 16px; font-weight: 600; }
+
+    /* Admin Vault Elements */
+    .admin-toolbar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .admin-search { flex: 1; margin-bottom: 0; }
+    .ideas-list { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; display: grid; gap: 10px; overflow-y: auto; flex: 1; min-height: 150px; }
+    .idea-card { border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); border-radius: 12px; padding: 14px; display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; }
+    .idea-card .txt { font-size: 14px; font-weight: 700; color: #e2e8f0; line-height: 1.5; white-space: pre-wrap; word-break: break-word;}
+    .idea-card .meta { font-size: 11px; color: var(--accent-gold); margin-top: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+
+    body.locked { overflow: hidden; }
+    .start-overlay { position: fixed; inset: 0; background: var(--bg-dark); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; transition: opacity 0.5s; }
+  </style>
+</head>
+
+<body class="locked">
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="particles" aria-hidden="true"></div>
+
+  <div class="start-overlay" id="startOverlay">
+    <h1 style="font-size: 36px; font-weight: 900; margin-bottom: 16px; background: linear-gradient(135deg, #fbbf24, #fb7185); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">הרולטה של אופיר</h1>
+    <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 32px; max-width: 300px; font-weight: 600;">מערכת החלטות שף פרימיום. האלגוריתם מחלק משימות ורשימות בצורה הוגנת.</p>
+    <button class="btn-primary" style="padding: 18px 32px; border-radius: 999px;" id="initAppBtn">הפעל מערכת</button>
+  </div>
+
+  <div class="modal-backdrop" id="ideaModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <h3>שדרוג שף</h3>
+      <p id="ideaContext">יש לך רעיון למנה? זה נשמר לוקאלית אצלך.</p>
+      <textarea class="textarea" id="ideaInput" placeholder="דוגמה: רוטב איולי כמהין בצד..." maxlength="280"></textarea>
+      <div class="btn-group">
+        <button class="btn-primary" id="saveIdeaBtn">שמור רעיון 🚀</button>
+        <button class="btn-secondary" onclick="ModalManager.close('ideaModal')">סגור</button>
+      </div>
+      <div class="note">המידע נשמר על המכשיר (Local Storage) ולא עובר לשרת.</div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminAuthModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <h3>גישת מנהל</h3>
+      <p>רק אופיר יכול לפתוח את כספת הרעיונות.</p>
+      <input class="input" id="adminUser" placeholder="שם משתמש" />
+      <input class="input" id="adminPass" type="password" placeholder="סיסמה" />
+      <div class="btn-group">
+        <button class="btn-primary" id="loginBtn">התחבר</button>
+        <button class="btn-secondary" onclick="ModalManager.close('adminAuthModal')">ביטול</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminVaultModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" style="height: 85vh;">
+      <h3>הכספת 👑</h3>
+      <div class="admin-toolbar">
+        <input type="text" class="input admin-search" id="vaultSearch" placeholder="🔍 חפש רעיונות..." />
+      </div>
+      <div class="ideas-list" id="vaultList"></div>
+      <div class="btn-group" style="margin-top: 16px;">
+        <button class="btn-secondary" id="clearVaultBtn" style="color: var(--danger); border-color: rgba(239,68,68,0.2);">נקה כספת</button>
+        <button class="btn-secondary" onclick="ModalManager.close('adminVaultModal')">סגור</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <div class="ambient-glow"></div>
+    <div class="card" id="mainCard">
+      
+      <div class="top-actions">
+        <button class="chip good" id="adminToggleBtn">🔐 כניסת מנהל</button>
+        <button class="chip" id="openVaultBtn" style="display: none;">💡 פתח כספת</button>
+      </div>
+
+      <h2 class="header-title">מה אוכלים היום?</h2>
+      <p class="header-subtitle">רק אופיר אוהב אוכל טעים ומטוגן</p>
+
+      <div class="reel-wrapper">
+        <div class="reel-pointer"></div>
+        <div class="reel-strip" id="reelStrip">
+          </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn-primary" id="spinBtn" disabled>סובב רולטה 🎡</button>
+        <button class="btn-secondary" id="resetBtn" disabled>איפוס</button>
+      </div>
+
+      <div class="result-panel" id="resultPanel">
+        <div class="mood-text" id="moodDisplay"></div>
+        <div class="mood-subtext" id="moodSubDisplay"></div>
+
+        <div class="shopping-list" id="shoppingList">
+          <div class="shopping-title">חלוקת משימות הוגנת:</div>
+          <div id="tasksContainer"></div>
+        </div>
+
+        <div class="result-actions">
+          <button class="cta-btn cta-idea" id="promptIdeaBtn">💡 הצע שדרוג</button>
+          <button class="cta-btn cta-copy" id="copyListBtn">📋 העתק רשימה</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ==========================================
+  // UTILS & TOASTS
+  // ==========================================
+  const Toast = {
+    el: document.getElementById('toast'), timeout: null,
+    show(message, isError = false) {
+      this.el.textContent = message; this.el.className = `toast show ${isError ? 'error-toast' : ''}`;
+      clearTimeout(this.timeout); this.timeout = setTimeout(() => this.el.classList.remove('show'), 3000);
+    }
+  };
+
+  async function safeCopy(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); Toast.show("הועתק בהצלחה! 📋"); return; }
+      throw new Error("No clipboard");
+    } catch (err) {
+      const el = document.createElement('textarea'); el.value = text; 
+      el.setAttribute('readonly', ''); el.style.position = 'absolute'; el.style.left = '-9999px';
+      document.body.appendChild(el); el.focus(); el.select();
+      try { document.execCommand('copy'); Toast.show("הועתק בהצלחה! 📋"); } catch (ex) { Toast.show("שגיאה בהעתקה", true); }
+      document.body.removeChild(el);
+    }
+  }
+
+  function escapeHtml(str) { return String(str||"").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  // ==========================================
+  // MODAL MANAGER (History API & Focus Trap)
+  // ==========================================
+  const ModalManager = {
+    stack: [], lastFocus: null,
+    open(id) {
+      if (this.stack.length === 0) this.lastFocus = document.activeElement;
+      if (!this.stack.includes(id)) { this.stack.push(id); history.pushState({ modal: id }, ""); }
+      const el = document.getElementById(id); el.classList.add("active"); el.setAttribute('aria-hidden', 'false');
+      setTimeout(() => { const input = el.querySelector('input, textarea'); if(input) input.focus(); }, 100);
+    },
+    close(id, fromPop = false) {
+      const isTop = this.stack.length > 0 && this.stack[this.stack.length - 1] === id;
+      this.stack = this.stack.filter(m => m !== id);
+      const el = document.getElementById(id); el.classList.remove("active"); el.setAttribute('aria-hidden', 'true');
+      if (!fromPop && isTop && history.state && history.state.modal) history.back();
+      if (this.stack.length === 0 && this.lastFocus) { this.lastFocus.focus(); this.lastFocus = null; }
+    }
+  };
+
+  window.addEventListener('popstate', () => { if (ModalManager.stack.length > 0) ModalManager.close(ModalManager.stack[ModalManager.stack.length - 1], true); });
+  window.addEventListener("keydown", e => { if (e.key === "Escape" && ModalManager.stack.length > 0) ModalManager.close(ModalManager.stack[ModalManager.stack.length - 1]); });
+  document.querySelectorAll('.modal-backdrop').forEach(el => el.addEventListener("click", e => { if (e.target === el) ModalManager.close(el.id); }));
+
+  // ==========================================
+  // DATA & AUTH
+  // ==========================================
+  const AUTH = { USER: "תחנת תמר", PASS: "אוכל טעים", KEY: "ofir.auth", IDEAS: "ofir.ideas", TIME: "ofir.time" };
+  const THE_GUYS = [{ name: "אופיר", cssClass: "name-ofir", icon: "👑" }, { name: "דודי", cssClass: "name-dudi", icon: "🕶️" }, { name: "סתיו", cssClass: "name-stav", icon: "🎸" }];
+  const FOOD_DB = [
+    { name: "המבורגר וצ'יפס", type: "good", items: [{name:"בשר טחון",w:10},{name:"לחמניות",w:4},{name:"תפוחי אדמה",w:3},{name:"שמן עמוק",w:5},{name:"ירקות ורטבים",w:4},{name:"שתייה קרה",w:4}] },
+    { name: "שווארמה בלאפה", type: "good", items: [{name:"בשר שווארמה",w:10},{name:"לאפות טריות",w:4},{name:"טחינה ועמבה",w:5},{name:"ירקות",w:3},{name:"צ'יפס",w:4}] },
+    { name: "שניצל של שבת", type: "good", items: [{name:"חזות עוף",w:9},{name:"חלות",w:5},{name:"פירורי לחם וביצים",w:5},{name:"שמן וירקות למטבוחה",w:6},{name:"חצילים",w:3}] },
+    { name: "חזה עוף וברוקולי", type: "bad", items: [{name:"חזה עוף",w:9},{name:"ברוקולי",w:5},{name:"לימון ושמן זית",w:4},{name:"מים מינרלים",w:3}] },
+    { name: "סלט קינואה", type: "bad", items: [{name:"קינואה",w:6},{name:"עשבי תיבול",w:3},{name:"עגבניות ולימון",w:4},{name:"חמוציות ומלח",w:4}] }
+  ];
+
+  const Auth = {
+    check() { if(this.is() && Date.now() - parseInt(localStorage.getItem(AUTH.TIME)||"0") > 30*60000) this.logout(true); else this.touch(); this.updateUI(); },
+    touch() { if(this.is()) localStorage.setItem(AUTH.TIME, Date.now()); },
+    is() { return localStorage.getItem(AUTH.KEY) === "1"; },
+    login(u, p) { if(u.trim()===AUTH.USER && p===AUTH.PASS){ localStorage.setItem(AUTH.KEY,"1"); this.touch(); this.updateUI(); return true; } return false; },
+    logout(auto=false) { localStorage.removeItem(AUTH.KEY); this.updateUI(); ModalManager.close('adminVaultModal'); Toast.show(auto?"נותקת (חוסר פעילות)":"התנתקת", auto); },
+    updateUI() { 
+      const b=document.getElementById("adminToggleBtn"), v=document.getElementById("openVaultBtn");
+      if(this.is()){ b.innerHTML="👤 אופיר (מחובר)"; b.className="chip auth-in"; v.style.display="inline-block"; }
+      else { b.innerHTML="🔐 כניסת מנהל"; b.className="chip good"; v.style.display="none"; }
+    }
+  };
+  Auth.check();
+
+  const Store = {
+    get() { try { return JSON.parse(localStorage.getItem(AUTH.IDEAS)) || []; } catch { return []; } },
+    add(f, t) { const l=this.get(); l.unshift({id:Date.now().toString(36), f, t, d:Date.now()}); localStorage.setItem(AUTH.IDEAS, JSON.stringify(l.slice(0,100))); },
+    del(id) { localStorage.setItem(AUTH.IDEAS, JSON.stringify(this.get().filter(x=>x.id!==id))); },
+    clear() { localStorage.setItem(AUTH.IDEAS, "[]"); }
+  };
+
+  // ==========================================
+  // AUDIO & PARTICLES (Premium Polish)
+  // ==========================================
+  class FX {
+    constructor() { this.ctx = null; }
+    init() { try { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if(this.ctx.state==="suspended") this.ctx.resume(); } catch{} }
+    vib(p) { try { if(navigator.vibrate) navigator.vibrate(p); } catch{} }
+    tick() { if(!this.ctx)return; this.vib(10); try { const o=this.ctx.createOscillator(),g=this.ctx.createGain(); o.type="sine"; o.frequency.setValueAtTime(600,this.ctx.currentTime); o.frequency.exponentialRampToValueAtTime(1000,this.ctx.currentTime+0.02); g.gain.setValueAtTime(0.04,this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.01,this.ctx.currentTime+0.03); o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+0.03); } catch{} }
+    win(g) { if(!this.ctx)return; this.vib(g?[40,60,40,60,100]:[200,100,200]); try { const o=this.ctx.createOscillator(),ga=this.ctx.createGain(); o.type=g?"triangle":"sawtooth"; ga.gain.setValueAtTime(0.1,this.ctx.currentTime); ga.gain.linearRampToValueAtTime(0,this.ctx.currentTime+(g?0.5:0.7)); if(g){ o.frequency.setValueAtTime(523,this.ctx.currentTime); o.frequency.setValueAtTime(659,this.ctx.currentTime+0.1); o.frequency.setValueAtTime(783,this.ctx.currentTime+0.2); }else{ o.frequency.setValueAtTime(300,this.ctx.currentTime); o.frequency.exponentialRampToValueAtTime(80,this.ctx.currentTime+0.7); } o.connect(ga); ga.connect(this.ctx.destination); o.start(); o.stop(this.ctx.currentTime+(g?0.5:0.7)); } catch{} }
+    particles(c) {
+      const p = document.getElementById('particles'); p.innerHTML=''; if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      for(let i=0;i<25;i++){ const d=document.createElement('div'); d.className='particle'; d.style.left=Math.random()*100+'vw'; d.style.width=Math.random()*6+4+'px'; d.style.height=d.style.width; d.style.background=c[Math.floor(Math.random()*c.length)]; d.style.boxShadow=`0 0 10px ${d.style.background}`; d.style.animationDuration=(Math.random()*2+2)+'s'; d.style.animationDelay=(Math.random()*0.5)+'s'; d.addEventListener('animationend',()=>d.remove()); p.appendChild(d); }
+    }
+  }
+  const fx = new FX();
+
+  // ==========================================
+  // REEL ENGINE (The Slot Machine)
+  // ==========================================
+  const Reel = {
+    strip: document.getElementById('reelStrip'), itemH: 46, items: [],
+    build() {
+      this.strip.innerHTML = ''; this.items = [];
+      // Generate 60 items for a long spin
+      for(let i=0; i<60; i++) {
+        const item = FOOD_DB[Math.floor(Math.random()*FOOD_DB.length)];
+        this.items.push(item);
+        const div = document.createElement('div'); div.className = 'reel-item'; div.textContent = item.name;
+        this.strip.appendChild(div);
+      }
+      this.strip.style.transform = `translateY(0px)`;
+    },
+    spin(duration) {
+      return new Promise(resolve => {
+        this.build();
+        const targetIdx = 50; // Stop near the end
+        const targetY = -(targetIdx * this.itemH);
+        const start = performance.now();
+        let lastTick = 0;
+        
+        this.strip.classList.add('blur-effect');
+
+        const anim = (now) => {
+          let p = Math.max(0, Math.min((now - start) / duration, 1));
+          // easeOutBack equivalent for physics feel
+          const c1 = 1.70158; const c3 = c1 + 1;
+          const eased = 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2);
+          
+          const currentY = targetY * eased;
+          this.strip.style.transform = `translateY(${currentY}px)`;
+
+          // Audio ticks
+          const currentIdx = Math.abs(Math.floor(currentY / this.itemH));
+          if(currentIdx > lastTick && p < 0.9) { fx.tick(); lastTick = currentIdx; }
+
+          if (p < 0.8) {
+            // Highlight passing items
+            Array.from(this.strip.children).forEach((c,i) => c.classList.toggle('active', i === currentIdx));
+          }
+
+          if (p < 1) requestAnimationFrame(anim);
+          else {
+            this.strip.classList.remove('blur-effect');
+            Array.from(this.strip.children).forEach(c => c.classList.remove('active'));
+            this.strip.children[targetIdx].classList.add('active');
+            resolve(this.items[targetIdx]);
+          }
+        };
+        requestAnimationFrame(anim);
+      });
+    }
+  };
+
+  // ==========================================
+  // APP LOGIC
+  // ==========================================
+  let currentResult = null;
+  const els = { sBtn: document.getElementById('spinBtn'), rBtn: document.getElementById('resetBtn'), res: document.getElementById('resultPanel'), card: document.getElementById('mainCard') };
+  
+  function setBtns(s, r) { els.sBtn.disabled=!s; els.rBtn.disabled=!r; }
+
+  // Fair Dist algorithm
+  function distribute(items) {
+    const s = [...items].sort((a,b)=>b.w-a.w), b = THE_GUYS.map(()=>({w:0, i:[]}));
+    s.forEach(it => { let m = b.reduce((p,c)=>p.w<c.w?p:c); m.i.push(it); m.w+=it.w; });
+    return b;
+  }
+
+  async function startSpin() {
+    setBtns(false, false); els.res.classList.remove('show'); els.card.classList.remove('hero-pop', 'shake-anim');
+    const dur = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 10 : 3500;
+    const winner = await Reel.spin(dur);
+    currentResult = winner;
+    
+    // Hero Moment Pause
+    setTimeout(() => {
+      fx.win(winner.type === "good");
+      if(winner.type === "good") { fx.particles(['#fbbf24', '#fb7185', '#fff']); els.card.classList.add('hero-pop'); }
+      else els.card.classList.add('shake-anim');
+      
+      document.getElementById('moodDisplay').textContent = winner.type==="good"?"😎 החלטה גאונית!":"🤢 באסה של החיים...";
+      document.getElementById('moodDisplay').className = `mood-text ${winner.type}-mood`;
+      document.getElementById('moodSubDisplay').textContent = winner.type==="good"?"הולך להיות שמח בבטן.":"זה אופיר לא אוהב";
+      
+      const tc = document.getElementById('tasksContainer'); tc.innerHTML='';
+      distribute(winner.items).forEach((g, i) => {
+        const h = g.i.map(x=>`<span class="item-tag">${escapeHtml(x.name)}</span>`).join('');
+        tc.innerHTML += `<div class="person-task"><div class="person-name ${THE_GUYS[i].cssClass}">${THE_GUYS[i].icon} ${THE_GUYS[i].name}:</div><div class="items-container">${h}</div></div>`;
+      });
+      
+      els.res.classList.add('show'); setBtns(true, true);
+    }, 250);
+  }
+
+  // ==========================================
+  // EVENT LISTENERS
+  // ==========================================
+  document.getElementById('initAppBtn').addEventListener('click', () => { 
+    fx.init(); Reel.build(); document.body.classList.remove('locked');
+    document.getElementById('startOverlay').style.opacity = '0';
+    setTimeout(()=>document.getElementById('startOverlay').style.display='none', 500);
+    setBtns(true, false);
+  });
+
+  els.sBtn.addEventListener('click', startSpin);
+  els.rBtn.addEventListener('click', () => { currentResult=null; els.res.classList.remove('show'); els.card.classList.remove('hero-pop', 'shake-anim'); Reel.build(); setBtns(true, false); });
+
+  // Copy List
+  document.getElementById('copyListBtn').addEventListener('click', () => {
+    if(!currentResult) return;
+    let txt = `🛒 רשימת קניות ל${currentResult.name}:\n\n`;
+    distribute(currentResult.items).forEach((g,i) => { txt += `${THE_GUYS[i].name} מביא:\n` + g.i.map(x=>`- ${x.name}`).join('\n') + '\n\n'; });
+    safeCopy(txt.trim());
+  });
+
+  // Ideas (Friends)
+  document.getElementById('promptIdeaBtn').addEventListener('click', () => {
+    document.getElementById('ideaInput').value=''; document.getElementById('ideaContext').textContent = `שדרוג ל: ${currentResult.name}`; ModalManager.open('ideaModal');
+  });
+  document.getElementById('saveIdeaBtn').addEventListener('click', () => {
+    const t = document.getElementById('ideaInput').value.trim(); if(!t) return Toast.show("רעיון ריק?", true);
+    Store.add(currentResult.name, t); ModalManager.close('ideaModal'); Toast.show("נשלח לאופיר 🚀");
+  });
+
+  // Admin Auth
+  document.getElementById('adminToggleBtn').addEventListener('click', () => {
+    Auth.check(); if(Auth.is()) Auth.logout(); else { document.getElementById('adminUser').value=''; document.getElementById('adminPass').value=''; ModalManager.open('adminAuthModal'); }
+  });
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    if(Auth.login(document.getElementById('adminUser').value, document.getElementById('adminPass').value)) { ModalManager.close('adminAuthModal'); Toast.show("נכנסת כמנהל"); } else Toast.show("שגוי", true);
+  });
+
+  // Admin Vault
+  function renderVault(filter='') {
+    Auth.touch(); const v=document.getElementById('vaultList'), l=Store.get().filter(x=>x.t.includes(filter)||x.f.includes(filter)); v.innerHTML='';
+    if(!l.length) return v.innerHTML='<div class="note">ריק כאן.</div>';
+    l.forEach(x => { v.innerHTML+=`<div class="idea-card"><div><div class="txt">${escapeHtml(x.t)}</div><div class="meta">${escapeHtml(x.f)} · ${new Date(x.d).toLocaleDateString('he-IL')}</div></div><button class="btn-secondary" style="padding:6px 10px;font-size:12px;color:var(--danger)" onclick="Store.del('${x.id}');renderVault('${filter}')">מחק</button></div>`; });
+  }
+  document.getElementById('openVaultBtn').addEventListener('click', () => { Auth.check(); if(!Auth.is()) return; document.getElementById('vaultSearch').value=''; renderVault(); ModalManager.open('adminVaultModal'); });
+  document.getElementById('vaultSearch').addEventListener('input', e => renderVault(e.target.value));
+  document.getElementById('clearVaultBtn').addEventListener('click', () => { if(confirm("למחוק הכל?")) { Store.clear(); renderVault(); Toast.show("נוקה"); }});
+
+</script>
+</body>
+</html>
